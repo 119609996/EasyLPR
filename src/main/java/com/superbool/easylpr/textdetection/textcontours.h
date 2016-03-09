@@ -17,38 +17,45 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef OPENALPR_SCOREKEEPER_H
-#define	OPENALPR_SCOREKEEPER_H
+#ifndef TEXTCONTOURS_H
+#define	TEXTCONTOURS_H
 
-#include <string>
-#include <iostream>
-#include <iomanip>
+#include <vector>
+#include "opencv2/imgproc/imgproc.hpp"
 
 namespace alpr
 {
 
-  class ScoreKeeper {
+  class TextContours {
   public:
-    ScoreKeeper();
-    virtual ~ScoreKeeper();
+    TextContours();
+    TextContours(cv::Mat threshold);
+    virtual ~TextContours();
 
-    void setScore(std::string weight_id, float score, float weight);
+    void load(cv::Mat threshold);
 
-    float getTotal();
-    int size();
+    int width;
+    int height;
 
-    void printDebugScores();
+    std::vector<bool> goodIndices;
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+
+    unsigned int size();
+    int getGoodIndicesCount();
+
+    std::vector<bool> getIndicesCopy();
+    void setIndices(std::vector<bool> newIndices);
+
+    cv::Mat drawDebugImage() const;
+    cv::Mat drawDebugImage(cv::Mat baseImage) const;
 
   private:
 
-    std::vector<std::string> weight_ids;
-    std::vector<float> weights;
-
-    std::vector<float> scores;
 
   };
 
 }
 
-#endif	/* OPENALPR_SCOREKEEPER_H */
+#endif	/* TEXTCONTOURS_H */
 
