@@ -1,6 +1,7 @@
 package com.superbool.easylpr.edges;
 
 import com.sun.javafx.geom.Vec2f;
+import com.superbool.easylpr.PipelineData;
 import com.superbool.easylpr.textdetection.LineSegment;
 import com.superbool.easylpr.textdetection.TextLine;
 import org.opencv.core.*;
@@ -30,10 +31,10 @@ public class PlateLines {
     private boolean debug;
 
 
-    public PlateLines(PipelineData*pipelineData) {
+    public PlateLines(PipelineData pipelineData) {
         this.pipelineData = pipelineData;
 
-        this.debug = pipelineData -> config -> debugPlateLines;
+        this.debug = pipelineData.config.debugPlateLines;
 
         if (debug)
             cout << "PlateLines constructor" << endl;
@@ -44,8 +45,8 @@ public class PlateLines {
         if (this.debug)
             cout << "PlateLines findLines" << endl;
 
-        timespec startTime;
-        getTimeMonotonic( & startTime);
+        //timespec startTime;
+        //getTimeMonotonic( & startTime);
 
 
         // Ignore input images that are pure white or pure black

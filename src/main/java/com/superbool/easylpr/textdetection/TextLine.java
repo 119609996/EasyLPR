@@ -30,10 +30,12 @@ public class TextLine {
         List<Point> textAreaInts = new ArrayList<>();
         List<Point> linePolygonInts = new ArrayList<>();
 
-        for (int i = 0; i < textArea.size(); i++)
+        for (int i = 0; i < textArea.size(); i++) {
             textAreaInts.add(new Point(Math.round(textArea.get(i).x), Math.round(textArea.get(i).y)));
-        for (int i = 0; i < linePolygon.size(); i++)
+        }
+        for (int i = 0; i < linePolygon.size(); i++) {
             linePolygonInts.add(new Point(Math.round(linePolygon.get(i).x), Math.round(linePolygon.get(i).y)));
+        }
 
         initialize(textAreaInts, linePolygonInts, imgSize);
     }
@@ -41,13 +43,16 @@ public class TextLine {
 
     public void initialize(List<Point> textArea, List<Point> linePolygon, Size imgSize) {
         if (textArea.size() > 0) {
-            if (textArea.size() > 0)
+            if (textArea.size() > 0) {
                 textArea.clear();
-            if (linePolygon.size() > 0)
+            }
+            if (linePolygon.size() > 0) {
                 linePolygon.clear();
+            }
 
-            for (int i = 0; i < textArea.size(); i++)
+            for (int i = 0; i < textArea.size(); i++) {
                 textArea.add(textArea.get(i));
+            }
 
             topLine = new LineSegment(linePolygon.get(0).x, linePolygon.get(0).y, linePolygon.get(1).x, linePolygon.get(1).y);
             bottomLine = new LineSegment(linePolygon.get(3).x, linePolygon.get(3).y, linePolygon.get(2).x, linePolygon.get(2).y);
@@ -89,7 +94,7 @@ public class TextLine {
             // Subtract a pixel since the height is a little overestimated by the bounding box
             lineHeight = lineHeight - 1;
 
-            angle = (topLine.angle + bottomLine.angle) / 2;
+            angle = (float) ((topLine.getAngle() + bottomLine.getAngle()) / 2);
 
         }
     }
@@ -107,13 +112,13 @@ public class TextLine {
 
         Imgproc.fillConvexPoly(debugImage, textArea, new Scalar(125, 255, 0));
 
-        Imgproc.line(debugImage, topLine.p1, topLine.p2, new Scalar(255, 0, 0), 1);
-        Imgproc.line(debugImage, bottomLine.p1, bottomLine.p2, new Scalar(255, 0, 0), 1);
+        Imgproc.line(debugImage, topLine.getP1(), topLine.getP2(), new Scalar(255, 0, 0), 1);
+        Imgproc.line(debugImage, bottomLine.getP1(), bottomLine.getP2(), new Scalar(255, 0, 0), 1);
 
-        Imgproc.line(debugImage, charBoxTop.p1, charBoxTop.p2, new Scalar(0, 125, 125), 1);
-        Imgproc.line(debugImage, charBoxLeft.p1, charBoxLeft.p2, new Scalar(0, 125, 125), 1);
-        Imgproc.line(debugImage, charBoxRight.p1, charBoxRight.p2, new Scalar(0, 125, 125), 1);
-        Imgproc.line(debugImage, charBoxBottom.p1, charBoxBottom.p2, new Scalar(0, 125, 125), 1);
+        Imgproc.line(debugImage, charBoxTop.getP1(), charBoxTop.getP2(), new Scalar(0, 125, 125), 1);
+        Imgproc.line(debugImage, charBoxLeft.getP1(), charBoxLeft.getP2(), new Scalar(0, 125, 125), 1);
+        Imgproc.line(debugImage, charBoxRight.getP1(), charBoxRight.getP2(), new Scalar(0, 125, 125), 1);
+        Imgproc.line(debugImage, charBoxBottom.getP1(), charBoxBottom.getP2(), new Scalar(0, 125, 125), 1);
 
 
         return debugImage;

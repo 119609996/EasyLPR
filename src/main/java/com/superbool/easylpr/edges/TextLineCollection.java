@@ -54,7 +54,7 @@ public class TextLineCollection {
 
         longerSegment = this.bottomCharArea;
         shorterSegment = this.topCharArea;
-        if (this.topCharArea.length > this.bottomCharArea.length) {
+        if (this.topCharArea.getLength() > this.bottomCharArea.getLength()) {
             longerSegment = this.topCharArea;
             shorterSegment = this.bottomCharArea;
         }
@@ -69,8 +69,8 @@ public class TextLineCollection {
     public Mat getDebugImage(Size imageSize) {
 
         Mat debugImage = Mat.zeros(imageSize, CvType.CV_8U);
-        Imgproc.line(debugImage, this.centerHorizontalLine.p1, this.centerHorizontalLine.p2, new Scalar(255, 255, 255), 2);
-        Imgproc.line(debugImage, this.centerVerticalLine.p1, this.centerVerticalLine.p2, new Scalar(255, 255, 255), 2);
+        Imgproc.line(debugImage, this.centerHorizontalLine.getP1(), this.centerHorizontalLine.getP2(), new Scalar(255, 255, 255), 2);
+        Imgproc.line(debugImage, this.centerVerticalLine.getP1(), this.centerVerticalLine.getP2(), new Scalar(255, 255, 255), 2);
 
         return debugImage;
 
@@ -81,16 +81,16 @@ public class TextLineCollection {
     public int isAboveText(LineSegment line) {
         // Test four points (left and right corner of top and bottom line)
 
-        Point topLeft = line.closestPointOnSegmentTo(topCharArea.p1);
-        Point topRight = line.closestPointOnSegmentTo(topCharArea.p2);
+        Point topLeft = line.closestPointOnSegmentTo(topCharArea.getP1());
+        Point topRight = line.closestPointOnSegmentTo(topCharArea.getP2());
 
         boolean lineIsBelowTop = topCharArea.isPointBelowLine(topLeft) || topCharArea.isPointBelowLine(topRight);
 
         if (!lineIsBelowTop)
             return 1;
 
-        Point bottomLeft = line.closestPointOnSegmentTo(bottomCharArea.p1);
-        Point bottomRight = line.closestPointOnSegmentTo(bottomCharArea.p2);
+        Point bottomLeft = line.closestPointOnSegmentTo(bottomCharArea.getP1());
+        Point bottomRight = line.closestPointOnSegmentTo(bottomCharArea.getP2());
 
         boolean lineIsBelowBottom = bottomCharArea.isPointBelowLine(bottomLeft) &&
                 bottomCharArea.isPointBelowLine(bottomRight);
@@ -105,20 +105,20 @@ public class TextLineCollection {
     // Returns 1 for left, 0 for within, and -1 for to the right
     public int isLeftOfText(LineSegment line) {
 
-        LineSegment leftSide = new LineSegment(bottomCharArea.p1, topCharArea.p1);
+        LineSegment leftSide = new LineSegment(bottomCharArea.getP1(), topCharArea.getP2());
 
-        Point topLeft = line.closestPointOnSegmentTo(leftSide.p2);
-        Point bottomLeft = line.closestPointOnSegmentTo(leftSide.p1);
+        Point topLeft = line.closestPointOnSegmentTo(leftSide.getP2());
+        Point bottomLeft = line.closestPointOnSegmentTo(leftSide.getP1());
 
         boolean lineIsAboveLeft = (!leftSide.isPointBelowLine(topLeft)) && (!leftSide.isPointBelowLine(bottomLeft));
 
         if (lineIsAboveLeft)
             return 1;
 
-        LineSegment rightSide = new LineSegment(bottomCharArea.p2, topCharArea.p2);
+        LineSegment rightSide = new LineSegment(bottomCharArea.getP2(), topCharArea.getP2());
 
-        Point topRight = line.closestPointOnSegmentTo(rightSide.p2);
-        Point bottomRight = line.closestPointOnSegmentTo(rightSide.p1);
+        Point topRight = line.closestPointOnSegmentTo(rightSide.getP2());
+        Point bottomRight = line.closestPointOnSegmentTo(rightSide.getP1());
 
 
         boolean lineIsBelowRight = rightSide.isPointBelowLine(topRight) && rightSide.isPointBelowLine(bottomRight);
@@ -136,15 +136,15 @@ public class TextLineCollection {
         // left and right
 
 
-        Point leftP1 = shorterSegment.closestPointOnSegmentTo(longerSegment.p1);
-        Point leftP2 = longerSegment.p1;
+        Point leftP1 = shorterSegment.closestPointOnSegmentTo(longerSegment.getP1());
+        Point leftP2 = longerSegment.getP1();
         LineSegment left = new LineSegment(leftP1, leftP2);
 
         Point leftMidpoint = left.midpoint();
 
 
-        Point rightP1 = shorterSegment.closestPointOnSegmentTo(longerSegment.p2);
-        Point rightP2 = longerSegment.p2;
+        Point rightP1 = shorterSegment.closestPointOnSegmentTo(longerSegment.getP2());
+        Point rightP2 = longerSegment.getP2();
         LineSegment right = new LineSegment(rightP1, rightP2);
 
         Point rightMidpoint = right.midpoint();
