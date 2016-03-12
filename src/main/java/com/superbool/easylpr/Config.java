@@ -33,7 +33,7 @@ public class Config {
     public int maxDetectionInputWidth;
     public int maxDetectionInputHeight;
 
-    public float contrastDetectionThreshold;
+    public static float contrastDetectionThreshold;
 
     public boolean skipDetection;
 
@@ -77,7 +77,7 @@ public class Config {
     public int charAnalysisNumSteps;
 
     public float plateLinesSensitivityVertical;
-    float plateLinesSensitivityHorizontal;
+    public float plateLinesSensitivityHorizontal;
 
     public float segmentationMinSpeckleHeightPercent;
     public int segmentationMinBoxWidthPx;

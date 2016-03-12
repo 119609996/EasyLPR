@@ -16,25 +16,36 @@ public class ImageViewer {
     private static final Logger logger = LoggerFactory.getLogger(ImageViewer.class);
     private JLabel imageView;
 
-    /**
-     * 如果使用junit测试时调用该方法，图像会一闪而过，可通过sleep()等方式暂时显示
-     * @param image
-     */
+    private Mat image;
+    private String windowName;
 
     /**
-     * 图片显示
+     * 如果使用junit测试时调用该方法，图像会一闪而过，可通过sleep()等方式暂时显示
      *
-     * @param image
+     * @param
      */
-    public void imshow(Mat image) {
-        imshow(image, "");
+
+
+    public ImageViewer(Mat image) {
+        this.image = image;
+        this.windowName = windowName;
     }
+
 
     /**
      * @param image      要显示的mat
      * @param windowName 窗口标题
      */
-    public void imshow(Mat image, String windowName) {
+    public ImageViewer(Mat image, String windowName) {
+        this.image = image;
+        this.windowName = windowName;
+    }
+
+
+    /**
+     * 图片显示
+     */
+    public void imshow() {
         setSystemLookAndFeel();
         JFrame frame = createJFrame(windowName);
         Image loadedImage = toBufferedImage(image);

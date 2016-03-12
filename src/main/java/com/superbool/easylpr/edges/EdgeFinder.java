@@ -1,19 +1,27 @@
+/*
 package com.superbool.easylpr.edges;
 
+import com.superbool.easylpr.Config;
 import com.superbool.easylpr.PipelineData;
+import com.superbool.easylpr.Transformation;
 import com.superbool.easylpr.textdetection.LineSegment;
 import com.superbool.easylpr.textdetection.TextLine;
 import com.superbool.easylpr.util.Utility;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+*/
 /**
  * Created by kofee on 2016/3/10.
- */
+ *//*
+
 public class EdgeFinder {
+    private static final Logger logger = LoggerFactory.getLogger(EdgeFinder.class);
 
     private PipelineData pipeline_data;
 
@@ -46,8 +54,8 @@ public class EdgeFinder {
         // If it's a nice, long segment, then guess the correct box based on character height/position
         if (high_contrast) {
             Mat crop_gray = new Mat();
-            int expandX = (int) (crop_gray.cols() * 0.5f);
-            int expandY = (int) (crop_gray.rows() * 0.5f);
+            int expandX = (int) (crop_gray.cols() * 0.5);
+            int expandY = (int) (crop_gray.rows() * 0.5);
             int w = crop_gray.cols();
             int h = crop_gray.rows();
 
@@ -55,17 +63,19 @@ public class EdgeFinder {
             corners.add(new Point(expandX + w, -1 * expandY));
             corners.add(new Point(expandX + w, expandY + h));
             corners.add(new Point(-1 * expandX, expandY + h));
+
         } else if (tlc.longerSegment.getLength() > tlc.charHeight * 3) {
 
-            float charHeightToPlateWidthRatio = pipeline_data.config.plateWidthMM / pipeline_data.config.avgCharHeightMM;
-            float idealPixelWidth = (float) (tlc.charHeight * (charHeightToPlateWidthRatio * 1.03));    // Add 3% so we don't clip any characters
+            double charHeightToPlateWidthRatio = pipeline_data.config.plateWidthMM / pipeline_data.config.avgCharHeightMM;
+            double idealPixelWidth = tlc.charHeight * (charHeightToPlateWidthRatio * 1.03);    // Add 3% so we don't clip any characters
 
-            float charHeightToPlateHeightRatio = pipeline_data.config.plateHeightMM / pipeline_data.config.avgCharHeightMM;
-            float idealPixelHeight = tlc.charHeight * charHeightToPlateHeightRatio;
+            double charHeightToPlateHeightRatio = pipeline_data.config.plateHeightMM / pipeline_data.config.avgCharHeightMM;
+            double idealPixelHeight = tlc.charHeight * charHeightToPlateHeightRatio;
 
 
-            float verticalOffset = (float) (idealPixelHeight * 1.5 / 2);
-            float horizontalOffset = (float) (idealPixelWidth * 1.25 / 2);
+            double verticalOffset = idealPixelHeight * 1.5 / 2;
+            double horizontalOffset = idealPixelWidth * 1.25 / 2;
+
             LineSegment topLine = tlc.centerHorizontalLine.getParallelLine(verticalOffset);
             LineSegment bottomLine = tlc.centerHorizontalLine.getParallelLine(-1 * verticalOffset);
 
@@ -83,8 +93,8 @@ public class EdgeFinder {
             corners.add(botLeft);
         } else {
 
-            int expandX = (int) ((int) ((float) pipeline_data.crop_gray.cols()) * 0.15f);
-            int expandY = (int) ((int) ((float) pipeline_data.crop_gray.rows()) * 0.15f);
+            int expandX = (int) ((int) ((double) pipeline_data.crop_gray.cols()) * 0.15f);
+            int expandY = (int) ((int) ((double) pipeline_data.crop_gray.rows()) * 0.15f);
             int w = pipeline_data.crop_gray.cols();
             int h = pipeline_data.crop_gray.rows();
 
@@ -97,11 +107,11 @@ public class EdgeFinder {
         }
 
         // Re-crop an image (from the original image) using the new coordinates
+        //使用新的坐标重新裁剪图像（从原始图像）
         Transformation imgTransform = new Transformation(pipeline_data.grayImg, pipeline_data.crop_gray, pipeline_data.regionOfInterest);
         List<Point> remappedCorners = imgTransform.transformSmallPointsToBigImage(corners);
 
-        Size cropSize = imgTransform.getCropSize(remappedCorners,
-                new Size(pipeline_data.config.templateWidthPx, pipeline_data.config.templateHeightPx));
+        Size cropSize = imgTransform.getCropSize(remappedCorners, new Size(pipeline_data.config.templateWidthPx, pipeline_data.config.templateHeightPx));
 
         Mat transmtx = imgTransform.getTransformationMatrix(remappedCorners, cropSize);
         Mat newCrop = imgTransform.crop(cropSize, transmtx);
@@ -109,8 +119,8 @@ public class EdgeFinder {
         // Re-map the textline coordinates to the new crop  
         List<TextLine> newLines = new ArrayList<>();
         for (int i = 0; i < pipeline_data.textLines.size(); i++) {
-            List<Point> textArea = imgTransform.transformSmallPointsToBigImage(pipeline_data.textLines[i].textArea);
-            List<Point> linePolygon = imgTransform.transformSmallPointsToBigImage(pipeline_data.textLines[i].linePolygon);
+            List<Point> textArea = imgTransform.transformSmallPointsToBigImage( pipeline_data.textLines.get(i).textArea);
+            List<Point> linePolygon = imgTransform.transformSmallPointsToBigImage(pipeline_data.textLines.get(i).linePolygon);
 
             List<Point> textAreaRemapped;
             List<Point> linePolygonRemapped;
@@ -180,7 +190,7 @@ public class EdgeFinder {
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(thresholded_crop, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        float MIN_AREA = (float) (0.05 * newCrop.cols() * newCrop.rows());
+        double MIN_AREA = (double) (0.05 * newCrop.cols() * newCrop.rows());
         for (int i = 0;
              i < contours.size(); i++) {
             if (Imgproc.contourArea(contours[i]) < MIN_AREA)
@@ -196,13 +206,13 @@ public class EdgeFinder {
 
             List<Point> sorted_polygon_points = sortPolygonPoints(rect_points, newCrop.size());
 
-            float polygon_width = (float) ((Utility.distanceBetweenPoints(sorted_polygon_points.get(0), sorted_polygon_points.get(1)) +
-                    Utility.distanceBetweenPoints(sorted_polygon_points.get(3), sorted_polygon_points.get(2))) / 2);
-            float polygon_height = (float) ((Utility.distanceBetweenPoints(sorted_polygon_points.get(2), sorted_polygon_points.get(1)) +
-                    Utility.distanceBetweenPoints(sorted_polygon_points.get(3), sorted_polygon_points.get(0))) / 2);
+            double polygon_width = (Utility.distanceBetweenPoints(sorted_polygon_points.get(0), sorted_polygon_points.get(1)) +
+                    Utility.distanceBetweenPoints(sorted_polygon_points.get(3), sorted_polygon_points.get(2))) / 2;
+            double polygon_height = (Utility.distanceBetweenPoints(sorted_polygon_points.get(2), sorted_polygon_points.get(1)) +
+                    Utility.distanceBetweenPoints(sorted_polygon_points.get(3), sorted_polygon_points.get(0))) / 2;
             // If it touches the edges, disqualify it
 
-            // Create an inner rect, and test to make sure all the points are within it
+            // Create an inner rect, and ztest to make sure all the points are within it
             int x_offset = (int) (newCrop.cols() * 0.1);
             int y_offset = (int) (newCrop.rows() * 0.1);
             Rect insideRect = new Rect(new Point(x_offset, y_offset), new Point(newCrop.cols() - x_offset, newCrop.rows() - y_offset));
@@ -217,7 +227,7 @@ public class EdgeFinder {
                 continue;
 
             // If the center is not centered, disqualify it
-            float MAX_CLOSENESS_TO_EDGE_PERCENT = 0.2f;
+            double MAX_CLOSENESS_TO_EDGE_PERCENT = 0.2f;
             if (rrect.center.x < (newCrop.cols() * MAX_CLOSENESS_TO_EDGE_PERCENT) ||
                     rrect.center.x > (newCrop.cols() - (newCrop.cols() * MAX_CLOSENESS_TO_EDGE_PERCENT)) ||
                     rrect.center.y < (newCrop.rows() * MAX_CLOSENESS_TO_EDGE_PERCENT) ||
@@ -226,10 +236,10 @@ public class EdgeFinder {
             }
 
             // Make sure the aspect ratio is somewhat close to a license plate.
-            float aspect_ratio = polygon_width / polygon_height;
-            float ideal_aspect_ratio = pipeline_data.config.plateWidthMM / pipeline_data.config.plateHeightMM;
+            double aspect_ratio = polygon_width / polygon_height;
+            double ideal_aspect_ratio = pipeline_data.config.plateWidthMM / pipeline_data.config.plateHeightMM;
 
-            float ratio = ideal_aspect_ratio / aspect_ratio;
+            double ratio = ideal_aspect_ratio / aspect_ratio;
 
             if (ratio > 2 || ratio < 0.5)
                 continue;
@@ -263,15 +273,14 @@ public class EdgeFinder {
         return smallPlateCorners;
     }
 
-
-    private static final float contrastDetectionThreshold = 123f;
-
-    /**
+    */
+/**
      * 判断是否是高对比度
      *
-     * @param crop
+     * @param crop  灰度图像
      * @return
-     */
+     *//*
+
     boolean is_high_contrast(final Mat crop) {
 
         int stride = 2;
@@ -279,36 +288,32 @@ public class EdgeFinder {
         int rows = crop.rows();
         int cols = crop.cols() / stride;
 
-        //timespec startTime;
-        //getTimeMonotonic(&startTime);
+        long startTime = System.currentTimeMillis();
         // 计算像素点强度
-        float avg_intensity = 0;
+        double avg_intensity = 0;
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < crop.cols(); x += stride) {
-                avg_intensity = (float) (avg_intensity + crop.get(y, x)[0]);
+                avg_intensity = avg_intensity + crop.get(y, x)[0];
             }
         }
-        avg_intensity = avg_intensity / (float) (rows * cols * 255);
 
-        // Calculate RMS contrast 返回的第一个参数的值提高到第二个参数的幂
-        float contrast = 0;
+        avg_intensity = avg_intensity / (rows * cols * 255);
+
+        // Calculate RMS contrast
+        double contrast = 0;
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < crop.cols(); x += stride) {
-                contrast += Math.pow(((crop.get(y, x)[0] / 255.0) - avg_intensity), 2.0f);
+                contrast += Math.pow(((crop.get(y, x)[0] / 255.0) - avg_intensity), 2.0);
             }
         }
-        contrast /= ((float) rows) * ((float) cols);
+        contrast /= rows * cols;
 
-        contrast = (float) Math.pow(contrast, 0.5f);
+        contrast = Math.pow(contrast, 0.5);
 
-/*        if (pipeline_data->config->debugTiming)
-        {
-            timespec endTime;
-            getTimeMonotonic(&endTime);
-            cout << "High Contrast Detection Time: " << diffclock(startTime, endTime) << "ms." << endl;
-        }*/
+        logger.debug("高对比度计算时间{}", System.currentTimeMillis() - startTime);
 
-        return contrast > contrastDetectionThreshold;
+        return contrast > Config.contrastDetectionThreshold;
     }
 
 }
+*/

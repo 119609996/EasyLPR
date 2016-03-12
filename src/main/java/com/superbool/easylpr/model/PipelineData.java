@@ -1,5 +1,6 @@
-package com.superbool.easylpr;
+package com.superbool.easylpr.model;
 
+import com.superbool.easylpr.Config;
 import com.superbool.easylpr.edges.ScoreKeeper;
 import com.superbool.easylpr.textdetection.TextLine;
 import org.opencv.core.Mat;
